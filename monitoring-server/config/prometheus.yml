@@ -1,0 +1,49 @@
+global: {evaluation_interval: 5s, scrape_interval: 5s}
+scrape_configs:
+# Target to Pushgateway (for application-layer metrics collection) 
+- job_name: pushgateway
+  static_configs:
+  - targets: ['localhost:9091']
+- job_name: prometheus
+  static_configs:
+  - targets: ['localhost:9090']
+# Target to Netdata (for Physical host and VMware metrics collection) 
+- job_name: netdata-test-env1
+  metrics_path: /api/v1/allmetrics
+  params:
+    format: [prometheus]
+    source: [as-collected]
+  honor_labels: true
+  static_configs:
+    - targets: [<server1-ip>:<netdata-port>']
+# Target to Application Server monitoring endpoint  (for application-layer metrics collection) 
+- job_name: django-metrics
+  honor_timestamps: true
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - <django-ip>:<django-port>
+# Target to database monitoring endpoint  (for application-layer metrics collection) 
+- job_name: postgres-metrics
+  honor_timestamps: true
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - <postgres-ip>:<postgres-port>
+# Target to containers monitoring endpoint (cAdvisor)
+- job_name: Test-Env1-CNTS
+  honor_timestamps: true
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - <server1-ip>:8080
+- job_name: Test-Env2-CNTS
+  honor_timestamps: true
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - <server2-ip>:8080
